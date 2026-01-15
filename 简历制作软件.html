@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能简历制作器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #6366F1;
+            --primary-dark: #4338CA;
+            --secondary: #10B981;
+            --dark: #1F2937;
+            --light: #F9FAFB;
+            --gray: #6B7280;
+            --gray-light: #E5E7EB;
+            --white: #FFFFFF;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F3F4F6;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .logo-icon {
+            font-size: 28px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+        
+        .main-app {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 1024px) {
+            .main-app {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* 左侧编辑面板 */
+        .editor-panel {
+            background-color: var(--white);
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            height: fit-content;
+        }
+        
+        .panel-section {
+            margin-bottom: 35px;
+            border-bottom: 1px solid var(--gray-light);
+            padding-bottom: 30px;
+        }
+        
+        .panel-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        
+        .section-title i {
+            color: var(--primary);
+        }
+        
+        /* 照片上传区域 */
+        .photo-upload-area {
+            border: 2px dashed var(--gray-light);
+            border-radius: var(--radius);
+            padding: 30px;
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .photo-upload-area:hover {
+            border-color: var(--primary-light);
+        }
+        
+        .photo-upload-area.dragover {
+            border-color: var(--primary);
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: var(--gray);
+            margin-bottom: 15px;
+        }
+        
+        .photo-upload-area:hover .upload-icon {
+            color: var(--primary);
+        }
+        
+        .upload-text {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        
+        .upload-subtext {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        #photoInput {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .photo-preview {
+            display: none;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto;
+            border: 5px solid var(--white);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .photo-preview.show {
+            display: block;
+        }
+        
+        .photo-controls {
+            display: none;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .photo-controls.show {
+            display: flex;
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: var(--white);
+        }
+        
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        /* 模板选择区域 */
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .templates-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .template-card {
+            border: 2px solid var(--gray-light);
+            border-radius: var(--radius);
+            overflow: hidden;
+            cursor: pointer;
+            transition: var(--transition);
+            background-color: var(--white);
+        }
+        
+        .template-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .template-card.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+        
+        .template-preview {
+            height: 180px;
+            background-color: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .template-name {
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        /* 样式自定义区域 */
+        .style-controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .style-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .color-picker-group, .font-picker-group {
+            margin-bottom: 20px;
+        }
+        
+        .color-picker-label, .font-picker-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .color-options {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: var(--transition);
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .color-option.selected {
+            border-color: var(--dark);
+        }
+        
+        .font-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .font-option {
+            padding: 10px 18px;
+            border: 2px solid var(--gray-light);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        
+        .font-option:hover {
+            border-color: var(--primary);
+        }
+        
+        .font-option.selected {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* 右侧预览区域 */
+        .preview-panel {
+            position: sticky;
+            top: 30px;
+            background-color: var(--white);
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: var(--shadow-lg);
+            height: fit-content;
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .preview-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+        }
+        
+        .btn-secondary {
+            background-color: var(--gray-light);
+            color: var(--dark);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+        }
+        
+        /* 简历预览内容 */
+        .resume-preview {
+            background-color: white;
+            min-height: 800px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        /* 模板样式 */
+        .template-modern {
+            padding: 40px;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .template-modern .resume-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .template-modern .photo-container {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 30px;
+            border: 5px solid var(--gray-light);
+            flex-shrink: 0;
+        }
+        
+        .template-modern .photo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .template-modern .header-info h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+        
+        .template-modern .header-info .title {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .template-modern .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            font-size: 0.95rem;
+        }
+        
+        .template-modern .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .template-modern .contact-item i {
+            color: var(--primary);
+        }
+        
+        .template-modern .section {
+            margin-bottom: 35px;
+        }
+        
+        .template-modern .section-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--gray-light);
+            color: var(--dark);
+        }
+        
+        .template-modern .section-content {
+            line-height: 1.8;
+        }
+        
+        .template-minimalist {
+            padding: 40px;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .template-minimalist .resume-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .template-minimalist .photo-container {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 auto 20px;
+            border: 5px solid white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .template-minimalist .photo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .template-minimalist .header-info h1 {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            color: var(--dark);
+            letter-spacing: -0.5px;
+        }
+        
+        .template-minimalist .header-info .title {
+            font-size: 1.2rem;
+            color: var(--gray);
+            margin-bottom: 15px;
+        }
+        
+        .template-minimalist .contact-info {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            font-size: 0.95rem;
+        }
+        
+        .template-minimalist .section {
+            margin-bottom: 35px;
+        }
+        
+        .template-minimalist .section-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+            position: relative;
+            padding-left: 15px;
+        }
+        
+        .template-minimalist .section-title:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: var(--primary);
+        }
+        
+        .template-creative {
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+        }
+        
+        .template-creative .sidebar {
+            background-color: var(--primary);
+            color: white;
+            padding: 40px 30px;
+        }
+        
+        .template-creative .photo-container {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 auto 30px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .template-creative .photo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .template-creative .sidebar-section {
+            margin-bottom: 30px;
+        }
+        
+        .template-creative .sidebar-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 8px;
+        }
+        
+        .template-creative .main-content {
+            padding: 40px;
+        }
+        
+        .template-creative .header-info h1 {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+        
+        .template-creative .header-info .title {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        /* 隐藏模板的通用样式 */
+        .resume-template {
+            display: none;
+        }
+        
+        .resume-template.active {
+            display: block;
+        }
+        
+        /* 页脚 */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--gray);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--gray-light);
+            margin-top: 40px;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .template-creative {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .editor-panel, .preview-panel {
+                padding: 20px;
+            }
+            
+            .preview-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .action-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-file-alt logo-icon"></i>
+                <h1>智能简历制作器</h1>
+            </div>
+            <p class="subtitle">上传照片，选择模板，自定义样式，一键生成专业简历。完全免费，无需注册。</p>
+        </header>
+        
+        <div class="main-app">
+            <!-- 左侧编辑面板 -->
+            <div class="editor-panel">
+                <!-- 照片上传区域 -->
+                <div class="panel-section">
+                    <h2 class="section-title"><i class="fas fa-camera"></i> 个人照片</h2>
+                    <div class="photo-upload-area" id="photoUploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <p class="upload-text">点击或拖拽上传照片</p>
+                        <p class="upload-subtext">支持 JPG、PNG 格式，建议尺寸 400x400 像素</p>
+                        <input type="file" id="photoInput" accept="image/*">
+                        <img class="photo-preview" id="photoPreview" src="" alt="照片预览">
+                    </div>
+                    <div class="photo-controls" id="photoControls">
+                        <button class="btn btn-secondary" id="changePhotoBtn">
+                            <i class="fas fa-sync-alt"></i> 更换照片
+                        </button>
+                        <button class="btn btn-secondary" id="removePhotoBtn">
+                            <i class="fas fa-trash-alt"></i> 移除照片
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 个人信息填写 -->
+                <div class="panel-section">
+                    <h2 class="section-title"><i class="fas fa-user-edit"></i> 个人信息</h2>
+                    <div class="form-group">
+                        <label for="fullName">姓名</label>
+                        <input type="text" id="fullName" class="form-input" placeholder="请输入您的姓名" value="张明">
+                    </div>
+                    <div class="form-group">
+                        <label for="jobTitle">职位/头衔</label>
+                        <input type="text" id="jobTitle" class="form-input" placeholder="例如：前端开发工程师" value="前端开发工程师">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">电子邮箱</label>
+                        <input type="email" id="email" class="form-input" placeholder="example@email.com" value="zhangming@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">联系电话</label>
+                        <input type="tel" id="phone" class="form-input" placeholder="138-xxxx-xxxx" value="138-0013-8000">
+                    </div>
+                    <div class="form-group">
+                        <label for="location">所在地</label>
+                        <input type="text" id="location" class="form-input" placeholder="例如：北京" value="北京">
+                    </div>
+                    <div class="form-group">
+                        <label for="linkedin">LinkedIn/个人网站</label>
+                        <input type="text" id="linkedin" class="form-input" placeholder="https://linkedin.com/in/yourname" value="https://linkedin.com/in/zhangming">
+                    </div>
+                </div>
+                
+                <!-- 简历内容 -->
+                <div class="panel-section">
+                    <h2 class="section-title"><i class="fas fa-file-contract"></i> 简历内容</h2>
+                    <div class="form-group">
+                        <label for="summary">个人简介</label>
+                        <textarea id="summary" class="form-textarea" placeholder="简要介绍您的专业背景、技能和职业目标...">拥有5年前端开发经验，精通现代前端技术栈。擅长将设计转化为高效、响应式的Web应用。热衷于学习新技术，注重代码质量和团队协作。曾在多家互联网公司负责核心前端项目开发。</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="experience">工作经历</label>
+                        <textarea id="experience" class="form-textarea" placeholder="按时间倒序列出您的工作经历...">2020年至今 | 高级前端开发工程师 | ABC科技有限公司
+- 负责公司核心产品的前端架构设计与开发
+- 使用React、TypeScript和Next.js重构了用户中心模块，性能提升40%
+- 带领3人前端团队，推动代码规范化和自动化测试流程
+
+2018-2020 | 前端开发工程师 | XYZ网络公司
+- 参与多个企业级管理系统的前端开发
+- 实现了响应式设计，使产品在移动端体验大幅提升
+- 与后端团队协作，优化API接口，减少请求时间30%</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="education">教育背景</label>
+                        <textarea id="education" class="form-textarea" placeholder="列出您的教育经历...">2014-2018 | 学士学位 | 计算机科学与技术 | 北京理工大学
+- 主修课程：数据结构、算法设计、Web开发、数据库系统
+- 获得校级优秀毕业生称号
+
+2018-2020 | 硕士学位 | 软件工程 | 清华大学
+- 研究方向：前端工程化与性能优化
+- 发表学术论文2篇</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="skills">技能专长</label>
+                        <textarea id="skills" class="form-textarea" placeholder="列出您的技能，用逗号或换行分隔...">JavaScript (ES6+), TypeScript, React, Vue.js, Next.js
+HTML5, CSS3, Sass, Tailwind CSS
+前端工程化、Webpack、Vite
+响应式设计、跨浏览器兼容
+Git、团队协作、敏捷开发
+英语六级，具备良好的技术文档阅读能力</textarea>
+                    </div>
+                </div>
+                
+                <!-- 模板选择 -->
+                <div class="panel-section">
+                    <h2 class="section-title"><i class="fas fa-palette"></i> 选择模板</h2>
+                    <div class="templates-grid">
+                        <div class="template-card selected" data-template="modern">
+                            <div class="template-preview" style="background: linear-gradient(135deg, #4F46E5, #8B5CF6);">
+                                <div style="width: 80%; height: 15px; background: white; margin-bottom: 5px;"></div>
+                                <div style="width: 60%; height: 15px; background: rgba(255,255,255,0.7);"></div>
+                            </div>
+                            <div class="template-name">现代风格</div>
+                        </div>
+                        <div class="template-card" data-template="minimalist">
+                            <div class="template-preview" style="background: linear-gradient(135deg, #10B981, #34D399);">
+                                <div style="width: 70%; height: 15px; background: white; margin-bottom: 5px;"></div>
+                                <div style="width: 50%; height: 15px; background: rgba(255,255,255,0.7);"></div>
+                            </div>
+                            <div class="template-name">简约风格</div>
+                        </div>
+                        <div class="template-card" data-template="creative">
+                            <div class="template-preview" style="background: linear-gradient(135deg, #F59E0B, #FBBF24);">
+                                <div style="width: 60%; height: 15px; background: white; margin-bottom: 5px;"></div>
+                                <div style="width: 40%; height: 15px; background: rgba(255,255,255,0.7);"></div>
+                            </div>
+                            <div class="template-name">创意风格</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 样式自定义 -->
+                <div class="panel-section">
+                    <h2 class="section-title"><i class="fas fa-sliders-h"></i> 自定义样式</h2>
+                    <div class="style-controls">
+                        <div class="color-picker-group">
+                            <div class="color-picker-label">
+                                <span>主色调</span>
+                            </div>
+                            <div class="color-options">
+                                <div class="color-option selected" style="background-color: #4F46E5;" data-color="#4F46E5"></div>
+                                <div class="color-option" style="background-color: #10B981;" data-color="#10B981"></div>
+                                <div class="color-option" style="background-color: #F59E0B;" data-color="#F59E0B"></div>
+                                <div class="color-option" style="background-color: #EF4444;" data-color="#EF4444"></div>
+                                <div class="color-option" style="background-color: #8B5CF6;" data-color="#8B5CF6"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="font-picker-group">
+                            <div class="font-picker-label">
+                                <span>字体选择</span>
+                            </div>
+                            <div class="font-options">
+                                <div class="font-option selected" data-font="Inter">Inter</div>
+                                <div class="font-option" data-font="Poppins">Poppins</div>
+                                <div class="font-option" data-font="Arial">Arial</div>
+                                <div class="font-option" data-font="Georgia">Georgia</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧预览面板 -->
+            <div class="preview-panel">
+                <div class="preview-header">
+                    <h2 class="preview-title">简历预览</h2>
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" id="resetBtn">
+                            <i class="fas fa-redo"></i> 重置
+                        </button>
+                        <button class="btn btn-primary" id="downloadBtn">
+                            <i class="fas fa-download"></i> 下载简历
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="resume-preview" id="resumePreview">
+                    <!-- 现代风格模板 -->
+                    <div class="resume-template template-modern active" id="template-modern">
+                        <div class="resume-header">
+                            <div class="photo-container">
+                                <img id="modernPhoto" src="" alt="个人照片">
+                            </div>
+                            <div class="header-info">
+                                <h1 id="modernName">张明</h1>
+                                <div class="title" id="modernTitle">前端开发工程师</div>
+                                <div class="contact-info">
+                                    <div class="contact-item">
+                                        <i class="fas fa-envelope"></i>
+                                        <span id="modernEmail">zhangming@example.com</span>
+                                    </div>
+                                    <div class="contact-item">
+                                        <i class="fas fa-phone"></i>
+                                        <span id="modernPhone">138-0013-8000</span>
+                                    </div>
+                                    <div class="contact-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span id="modernLocation">北京</span>
+                                    </div>
+                                    <div class="contact-item">
+                                        <i class="fas fa-link"></i>
+                                        <span id="modernLinkedin">https://linkedin.com/in/zhangming</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3 class="section-title">个人简介</h3>
+                            <div class="section-content" id="modernSummary">
+                                拥有5年前端开发经验，精通现代前端技术栈。擅长将设计转化为高效、响应式的Web应用。热衷于学习新技术，注重代码质量和团队协作。曾在多家互联网公司负责核心前端项目开发。
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3 class="section-title">工作经历</h3>
+                            <div class="section-content" id="modernExperience">
+                                2020年至今 | 高级前端开发工程师 | ABC科技有限公司
+                                - 负责公司核心产品的前端架构设计与开发
+                                - 使用React、TypeScript和Next.js重构了用户中心模块，性能提升40%
+                                - 带领3人前端团队，推动代码规范化和自动化测试流程
+
+                                2018-2020 | 前端开发工程师 | XYZ网络公司
+                                - 参与多个企业级管理系统的前端开发
+                                - 实现了响应式设计，使产品在移动端体验大幅提升
+                                - 与后端团队协作，优化API接口，减少请求时间30%
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3 class="section-title">教育背景</h3>
+                            <div class="section-content" id="modernEducation">
+                                2014-2018 | 学士学位 | 计算机科学与技术 | 北京理工大学
+                                - 主修课程：数据结构、算法设计、Web开发、数据库系统
+                                - 获得校级优秀毕业生称号
+
+                                2018-2020 | 硕士学位 | 软件工程 | 清华大学
+                                - 研究方向：前端工程化与性能优化
+                                - 发表学术论文2篇
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3 class="section-title">技能专长</h3>
+                            <div class="section-content" id="modernSkills">
+                                JavaScript (ES6+), TypeScript, React, Vue.js, Next.js
+                                HTML5, CSS3, Sass, Tailwind CSS
+                                前端工程化、Webpack、Vite
+                                响应式设计、跨浏览器兼容
+                                Git、团队协作、敏捷开发
+                                英语六级，具备良好的技术文档阅读能力
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 简约风格模板 -->
+                    <div class="resume-template template-minimalist" id="template-minimalist">
+                        <div class="resume-header">
+                            <div class="photo-container">
+                                <img id="minimalistPhoto" src="" alt="个人照片">
+                            </div>
+                            <div class="header-info">
+                                <h1 id="minimalistName">张明</h1>
+                                <div class="title" id="minimalistTitle">前端开发工程师</div>
+                                <div class="contact-info">
+                                    <div class="contact-item">
+                                        <i class="fas fa-envelope"></i>
+                                        <span id="minimalistEmail">zhangming@example.com</span>
+                                    </div>
+                                    <div class="contact-item">
+                                        <i class="fas fa-phone"></i>
+                                        <span id="minimalistPhone">138-0013-8000</span>
+                                    </div>
+                                    <div class="contact-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span id="minimalistLocation">北京</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3 class="section-title">个人简介</h3>
+                            <div class="section-content" id="minimalistSummary">
+                                拥有5年前端开发经验，精通现代前端技术栈。擅长将设计转化为高效、响应式的Web应用。热衷于学习新技术，注重代码质量和团队协作。曾在多家互联网公司负责核心前端项目开发。
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3 class="section-title">工作经历</h3>
+                            <div class="section-content" id="minimalistExperience">
+                                2020年至今 | 高级前端开发工程师 | ABC科技有限公司
+                                - 负责公司核心产品的前端架构设计与开发
+                                - 使用React、TypeScript和Next.js重构了用户中心模块，性能提升40%
+                                - 带领3人前端团队，推动代码规范化和自动化测试流程
+
+                                2018-2020 | 前端开发工程师 | XYZ网络公司
+                                - 参与多个企业级管理系统的前端开发
+                                - 实现了响应式设计，使产品在移动端体验大幅提升
+                                - 与后端团队协作，优化API接口，减少请求时间30%
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3 class="section-title">教育背景</h3>
+                            <div class="section-content" id="minimalistEducation">
+                                2014-2018 | 学士学位 | 计算机科学与技术 | 北京理工大学
+                                - 主修课程：数据结构、算法设计、Web开发、数据库系统
+                                - 获得校级优秀毕业生称号
+
+                                2018-2020 | 硕士学位 | 软件工程 | 清华大学
+                                - 研究方向：前端工程化与性能优化
+                                - 发表学术论文2篇
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3 class="section-title">技能专长</h3>
+                            <div class="section-content" id="minimalistSkills">
+                                JavaScript (ES6+), TypeScript, React, Vue.js, Next.js
+                                HTML5, CSS3, Sass, Tailwind CSS
+                                前端工程化、Webpack、Vite
+                                响应式设计、跨浏览器兼容
+                                Git、团队协作、敏捷开发
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 创意风格模板 -->
+                    <div class="resume-template template-creative" id="template-creative">
+                        <div class="sidebar">
+                            <div class="photo-container">
+                                <img id="creativePhoto" src="" alt="个人照片">
+                            </div>
+                            
+                            <div class="sidebar-section">
+                                <h3 class="sidebar-title">联系方式</h3>
+                                <div class="contact-info">
+                                    <div class="contact-item" style="margin-bottom: 15px;">
+                                        <i class="fas fa-envelope"></i>
+                                        <span id="creativeEmail">zhangming@example.com</span>
+                                    </div>
+                                    <div class="contact-item" style="margin-bottom: 15px;">
+                                        <i class="fas fa-phone"></i>
+                                        <span id="creativePhone">138-0013-8000</span>
+                                    </div>
+                                    <div class="contact-item" style="margin-bottom: 15px;">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span id="creativeLocation">北京</span>
+                                    </div>
+                                    <div class="contact-item" style="margin-bottom: 15px;">
+                                        <i class="fas fa-link"></i>
+                                        <span id="creativeLinkedin">linkedin.com/in/zhangming</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="sidebar-section">
+                                <h3 class="sidebar-title">技能专长</h3>
+                                <div class="section-content" id="creativeSkills">
+                                    JavaScript (ES6+), TypeScript, React, Vue.js, Next.js
+                                    HTML5, CSS3, Sass, Tailwind CSS
+                                    前端工程化、Webpack、Vite
+                                    响应式设计、跨浏览器兼容
+                                    Git、团队协作、敏捷开发
+                                </div>
+                            </div>
+                            
+                            <div class="sidebar-section">
+                                <h3 class="sidebar-title">语言能力</h3>
+                                <div class="section-content">
+                                    中文 - 母语<br>
+                                    英语 - 流利 (CET-6)
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="main-content">
+                            <div class="header-info">
+                                <h1 id="creativeName">张明</h1>
+                                <div class="title" id="creativeTitle">前端开发工程师</div>
+                            </div>
+                            
+                            <div class="section">
+                                <h3 class="section-title">个人简介</h3>
+                                <div class="section-content" id="creativeSummary">
+                                    拥有5年前端开发经验，精通现代前端技术栈。擅长将设计转化为高效、响应式的Web应用。热衷于学习新技术，注重代码质量和团队协作。曾在多家互联网公司负责核心前端项目开发。
+                                </div>
+                            </div>
+                            
+                            <div class="section">
+                                <h3 class="section-title">工作经历</h3>
+                                <div class="section-content" id="creativeExperience">
+                                    2020年至今 | 高级前端开发工程师 | ABC科技有限公司
+                                    - 负责公司核心产品的前端架构设计与开发
+                                    - 使用React、TypeScript和Next.js重构了用户中心模块，性能提升40%
+                                    - 带领3人前端团队，推动代码规范化和自动化测试流程
+
+                                    2018-2020 | 前端开发工程师 | XYZ网络公司
+                                    - 参与多个企业级管理系统的前端开发
+                                    - 实现了响应式设计，使产品在移动端体验大幅提升
+                                    - 与后端团队协作，优化API接口，减少请求时间30%
+                                </div>
+                            </div>
+                            
+                            <div class="section">
+                                <h3 class="section-title">教育背景</h3>
+                                <div class="section-content" id="creativeEducation">
+                                    2014-2018 | 学士学位 | 计算机科学与技术 | 北京理工大学
+                                    - 主修课程：数据结构、算法设计、Web开发、数据库系统
+                                    - 获得校级优秀毕业生称号
+
+                                    2018-2020 | 硕士学位 | 软件工程 | 清华大学
+                                    - 研究方向：前端工程化与性能优化
+                                    - 发表学术论文2篇
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 智能简历制作器 | 本工具完全免费，所有数据仅保存在您的浏览器中</p>
+            <p style="margin-top: 10px;">提示：为了获得最佳打印效果，建议使用Chrome浏览器并选择"另存为PDF"</p>
+        </footer>
+    </div>
+
+    <!-- 用于生成PDF的库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <script>
+        // 全局变量
+        let currentTemplate = 'modern';
+        let primaryColor = '#4F46E5';
+        let selectedFont = 'Inter';
+        
+        // DOM元素
+        const photoUploadArea = document.getElementById('photoUploadArea');
+        const photoInput = document.getElementById('photoInput');
+        const photoPreview = document.getElementById('photoPreview');
+        const photoControls = document.getElementById('photoControls');
+        const changePhotoBtn = document.getElementById('changePhotoBtn');
+        const removePhotoBtn = document.getElementById('removePhotoBtn');
+        const templateCards = document.querySelectorAll('.template-card');
+        const colorOptions = document.querySelectorAll('.color-option');
+        const fontOptions = document.querySelectorAll('.font-option');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        // 表单输入元素
+        const fullNameInput = document.getElementById('fullName');
+        const jobTitleInput = document.getElementById('jobTitle');
+        const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('phone');
+        const locationInput = document.getElementById('location');
+        const linkedinInput = document.getElementById('linkedin');
+        const summaryInput = document.getElementById('summary');
+        const experienceInput = document.getElementById('experience');
+        const educationInput = document.getElementById('education');
+        const skillsInput = document.getElementById('skills');
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化示例照片
+            loadExamplePhoto();
+            
+            // 绑定事件监听器
+            bindEvents();
+            
+            // 更新简历预览
+            updateResumePreview();
+            
+            // 更新所有模板中的颜色
+            updateTemplateColors();
+        });
+        
+        // 加载示例照片
+        function loadExamplePhoto() {
+            // 创建一个示例图像（实际应用中可以从服务器加载）
+            const canvas = document.createElement('canvas');
+            canvas.width = 400;
+            canvas.height = 400;
+            const ctx = canvas.getContext('2d');
+            
+            // 绘制背景
+            ctx.fillStyle = '#4F46E5';
+            ctx.fillRect(0, 0, 400, 400);
+            
+            // 绘制头像轮廓
+            ctx.beginPath();
+            ctx.arc(200, 200, 180, 0, Math.PI * 2);
+            ctx.fillStyle = '#8B5CF6';
+            ctx.fill();
+            
+            // 绘制简化的头像
+            ctx.beginPath();
+            ctx.arc(200, 150, 40, 0, Math.PI * 2); // 头部
+            ctx.fillStyle = '#E5E7EB';
+            ctx.fill();
+            
+            // 身体
+            ctx.beginPath();
+            ctx.ellipse(200, 280, 70, 100, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#E5E7EB';
+            ctx.fill();
+            
+            // 转换为data URL
+            const dataURL = canvas.toDataURL('image/png');
+            
+            // 设置所有模板的照片
+            setPhotoToAllTemplates(dataURL);
+            
+            // 显示预览和控制按钮
+            photoPreview.src = dataURL;
+            photoPreview.classList.add('show');
+            photoControls.classList.add('show');
+        }
+        
+        // 绑定所有事件
+        function bindEvents() {
+            // 照片上传区域点击事件
+            photoUploadArea.addEventListener('click', function() {
+                photoInput.click();
+            });
+            
+            // 拖拽上传功能
+            photoUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            
+            photoUploadArea.addEventListener('dragleave', function() {
+                this.classList.remove('dragover');
+            });
+            
+            photoUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                
+                if (e.dataTransfer.files.length) {
+                    const file = e.dataTransfer.files[0];
+                    if (file.type.startsWith('image/')) {
+                        handleImageUpload(file);
+                    } else {
+                        alert('请上传图片文件（JPG、PNG格式）');
+                    }
+                }
+            });
+            
+            // 文件选择事件
+            photoInput.addEventListener('change', function(e) {
+                if (e.target.files.length) {
+                    const file = e.target.files[0];
+                    handleImageUpload(file);
+                }
+            });
+            
+            // 更换照片按钮
+            changePhotoBtn.addEventListener('click', function() {
+                photoInput.click();
+            });
+            
+            // 移除照片按钮
+            removePhotoBtn.addEventListener('click', function() {
+                // 清除所有模板中的照片
+                clearAllTemplatePhotos();
+                
+                // 隐藏预览和控制按钮
+                photoPreview.src = '';
+                photoPreview.classList.remove('show');
+                photoControls.classList.remove('show');
+            });
+            
+            // 模板选择事件
+            templateCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // 移除所有卡片的选中状态
+                    templateCards.forEach(c => c.classList.remove('selected'));
+                    
+                    // 添加当前卡片的选中状态
+                    this.classList.add('selected');
+                    
+                    // 获取模板名称
+                    currentTemplate = this.getAttribute('data-template');
+                    
+                    // 切换模板显示
+                    switchTemplate(currentTemplate);
+                });
+            });
+            
+            // 颜色选择事件
+            colorOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // 移除所有颜色选项的选中状态
+                    colorOptions.forEach(o => o.classList.remove('selected'));
+                    
+                    // 添加当前颜色选项的选中状态
+                    this.classList.add('selected');
+                    
+                    // 获取颜色值
+                    primaryColor = this.getAttribute('data-color');
+                    
+                    // 更新模板颜色
+                    updateTemplateColors();
+                });
+            });
+            
+            // 字体选择事件
+            fontOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // 移除所有字体选项的选中状态
+                    fontOptions.forEach(o => o.classList.remove('selected'));
+                    
+                    // 添加当前字体选项的选中状态
+                    this.classList.add('selected');
+                    
+                    // 获取字体值
+                    selectedFont = this.getAttribute('data-font');
+                    
+                    // 更新模板字体
+                    updateTemplateFonts();
+                });
+            });
+            
+            // 输入框实时更新简历预览
+            const inputs = [
+                fullNameInput, jobTitleInput, emailInput, phoneInput, 
+                locationInput, linkedinInput, summaryInput, experienceInput, 
+                educationInput, skillsInput
+            ];
+            
+            inputs.forEach(input => {
+                input.addEventListener('input', updateResumePreview);
+            });
+            
+            // 下载按钮事件
+            downloadBtn.addEventListener('click', downloadResume);
+            
+            // 重置按钮事件
+            resetBtn.addEventListener('click', resetForm);
+        }
+        
+        // 处理图片上传
+        function handleImageUpload(file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const imageData = e.target.result;
+                
+                // 设置所有模板的照片
+                setPhotoToAllTemplates(imageData);
+                
+                // 显示预览和控制按钮
+                photoPreview.src = imageData;
+                photoPreview.classList.add('show');
+                photoControls.classList.add('show');
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        // 设置所有模板的照片
+        function setPhotoToAllTemplates(imageData) {
+            // 获取所有模板的照片元素
+            const modernPhoto = document.getElementById('modernPhoto');
+            const minimalistPhoto = document.getElementById('minimalistPhoto');
+            const creativePhoto = document.getElementById('creativePhoto');
+            
+            // 设置照片
+            modernPhoto.src = imageData;
+            minimalistPhoto.src = imageData;
+            creativePhoto.src = imageData;
+        }
+        
+        // 清除所有模板中的照片
+        function clearAllTemplatePhotos() {
+            // 获取所有模板的照片元素
+            const modernPhoto = document.getElementById('modernPhoto');
+            const minimalistPhoto = document.getElementById('minimalistPhoto');
+            const creativePhoto = document.getElementById('creativePhoto');
+            
+            // 清除照片
+            modernPhoto.src = '';
+            minimalistPhoto.src = '';
+            creativePhoto.src = '';
+        }
+        
+        // 切换模板
+        function switchTemplate(templateName) {
+            // 隐藏所有模板
+            const templates = document.querySelectorAll('.resume-template');
+            templates.forEach(template => {
+                template.classList.remove('active');
+            });
+            
+            // 显示选中的模板
+            const activeTemplate = document.getElementById(`template-${templateName}`);
+            activeTemplate.classList.add('active');
+            
+            // 更新简历预览
+            updateResumePreview();
+        }
+        
+        // 更新简历预览
+        function updateResumePreview() {
+            // 获取表单数据
+            const formData = {
+                name: fullNameInput.value,
+                title: jobTitleInput.value,
+                email: emailInput.value,
+                phone: phoneInput.value,
+                location: locationInput.value,
+                linkedin: linkedinInput.value,
+                summary: summaryInput.value,
+                experience: experienceInput.value,
+                education: educationInput.value,
+                skills: skillsInput.value
+            };
+            
+            // 更新现代风格模板
+            document.getElementById('modernName').textContent = formData.name;
+            document.getElementById('modernTitle').textContent = formData.title;
+            document.getElementById('modernEmail').textContent = formData.email;
+            document.getElementById('modernPhone').textContent = formData.phone;
+            document.getElementById('modernLocation').textContent = formData.location;
+            document.getElementById('modernLinkedin').textContent = formData.linkedin;
+            document.getElementById('modernSummary').textContent = formData.summary;
+            document.getElementById('modernExperience').textContent = formData.experience;
+            document.getElementById('modernEducation').textContent = formData.education;
+            document.getElementById('modernSkills').textContent = formData.skills;
+            
+            // 更新简约风格模板
+            document.getElementById('minimalistName').textContent = formData.name;
+            document.getElementById('minimalistTitle').textContent = formData.title;
+            document.getElementById('minimalistEmail').textContent = formData.email;
+            document.getElementById('minimalistPhone').textContent = formData.phone;
+            document.getElementById('minimalistLocation').textContent = formData.location;
+            document.getElementById('minimalistSummary').textContent = formData.summary;
+            document.getElementById('minimalistExperience').textContent = formData.experience;
+            document.getElementById('minimalistEducation').textContent = formData.education;
+            document.getElementById('minimalistSkills').textContent = formData.skills;
+            
+            // 更新创意风格模板
+            document.getElementById('creativeName').textContent = formData.name;
+            document.getElementById('creativeTitle').textContent = formData.title;
+            document.getElementById('creativeEmail').textContent = formData.email;
+            document.getElementById('creativePhone').textContent = formData.phone;
+            document.getElementById('creativeLocation').textContent = formData.location;
+            document.getElementById('creativeLinkedin').textContent = formData.linkedin;
+            document.getElementById('creativeSummary').textContent = formData.summary;
+            document.getElementById('creativeExperience').textContent = formData.experience;
+            document.getElementById('creativeEducation').textContent = formData.education;
+            document.getElementById('creativeSkills').textContent = formData.skills;
+        }
+        
+        // 更新模板颜色
+        function updateTemplateColors() {
+            // 更新CSS变量
+            document.documentElement.style.setProperty('--primary', primaryColor);
+            
+            // 更新模板中的颜色相关元素
+            const primaryElements = document.querySelectorAll('.template-modern .section-title, .template-modern .title');
+            primaryElements.forEach(el => {
+                el.style.color = primaryColor;
+            });
+            
+            const modernHeaderBorder = document.querySelector('.template-modern .resume-header');
+            if (modernHeaderBorder) {
+                modernHeaderBorder.style.borderBottomColor = primaryColor;
+            }
+            
+            const minimalistTitleBorder = document.querySelectorAll('.template-minimalist .section-title');
+            minimalistTitleBorder.forEach(el => {
+                el.style.borderLeftColor = primaryColor;
+            });
+            
+            const creativeSidebar = document.querySelector('.template-creative .sidebar');
+            if (creativeSidebar) {
+                creativeSidebar.style.backgroundColor = primaryColor;
+            }
+        }
+        
+        // 更新模板字体
+        function updateTemplateFonts() {
+            // 更新现代风格模板字体
+            const modernTemplate = document.getElementById('template-modern');
+            modernTemplate.style.fontFamily = selectedFont;
+            
+            // 更新简约风格模板字体
+            const minimalistTemplate = document.getElementById('template-minimalist');
+            minimalistTemplate.style.fontFamily = selectedFont === 'Poppins' ? 'Poppins, sans-serif' : selectedFont + ', sans-serif';
+            
+            // 更新创意风格模板字体
+            const creativeTemplate = document.getElementById('template-creative');
+            creativeTemplate.style.fontFamily = selectedFont;
+        }
+        
+        // 下载简历
+        function downloadResume() {
+            const resumeElement = document.querySelector('.resume-template.active');
+            
+            // 使用html2canvas将简历转换为图片
+            html2canvas(resumeElement, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#FFFFFF'
+            }).then(canvas => {
+                // 创建PDF
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                // 计算PDF尺寸
+                const imgWidth = 190;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                
+                // 添加图片到PDF
+                const imgData = canvas.toDataURL('image/png');
+                pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+                
+                // 下载PDF
+                pdf.save(`${fullNameInput.value || '我的简历'}.pdf`);
+            });
+        }
+        
+        // 重置表单
+        function resetForm() {
+            if (confirm('确定要重置所有内容吗？这将清除您当前的所有输入。')) {
+                // 重置表单字段
+                fullNameInput.value = '';
+                jobTitleInput.value = '';
+                emailInput.value = '';
+                phoneInput.value = '';
+                locationInput.value = '';
+                linkedinInput.value = '';
+                summaryInput.value = '';
+                experienceInput.value = '';
+                educationInput.value = '';
+                skillsInput.value = '';
+                
+                // 重置模板选择
+                templateCards.forEach(card => card.classList.remove('selected'));
+                document.querySelector('.template-card[data-template="modern"]').classList.add('selected');
+                currentTemplate = 'modern';
+                switchTemplate('modern');
+                
+                // 重置颜色选择
+                colorOptions.forEach(option => option.classList.remove('selected'));
+                document.querySelector('.color-option[data-color="#4F46E5"]').classList.add('selected');
+                primaryColor = '#4F46E5';
+                updateTemplateColors();
+                
+                // 重置字体选择
+                fontOptions.forEach(option => option.classList.remove('selected'));
+                document.querySelector('.font-option[data-font="Inter"]').classList.add('selected');
+                selectedFont = 'Inter';
+                updateTemplateFonts();
+                
+                // 清除照片
+                clearAllTemplatePhotos();
+                photoPreview.src = '';
+                photoPreview.classList.remove('show');
+                photoControls.classList.remove('show');
+                
+                // 加载示例照片
+                loadExamplePhoto();
+                
+                // 更新简历预览
+                updateResumePreview();
+                
+                alert('表单已重置！');
+            }
+        }
+    </script>
+</body>
+</html>
